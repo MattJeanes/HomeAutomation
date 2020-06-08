@@ -31,9 +31,8 @@ namespace HomeAutomation.Web
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseHttpsRedirection(); // handled by docker
             }
-
-            app.UseHttpsRedirection();
 
             app.UseDefaultFiles();
 
