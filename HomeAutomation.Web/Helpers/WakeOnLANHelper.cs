@@ -10,7 +10,10 @@ namespace HomeAutomation.Web.Helpers
     {
         public async Task WakeAsync(string macAddress, string broadcastIP)
         {
-            using var client = new UdpClient();
+            using var client = new UdpClient
+            {
+                EnableBroadcast = true
+            };
             var datagram = new byte[102];
 
             for (var i = 0; i <= 5; i++)
@@ -44,7 +47,7 @@ namespace HomeAutomation.Web.Helpers
 
             var broadcastAddress = IPAddress.Parse(broadcastIP);
 
-            await client.SendAsync(datagram, datagram.Length, broadcastAddress.ToString(), 3);
+            await client.SendAsync(datagram, datagram.Length, broadcastAddress.ToString(), 9);
         }
     }
 }
