@@ -1,0 +1,270 @@
+﻿using HomeAutomation.Web.Data;
+using HomeAutomation.Web.Services.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace HomeAutomation.Web.Services
+{
+    public class TeslaService : ITeslaService
+    {
+        private readonly HttpClient _client;
+        private readonly TeslaOptions _options;
+        private readonly IMemoryCache _cache;
+        private readonly ILogger<TeslaService> _logger;
+        private readonly Regex ClientUrlRegex = new Regex("^.+=(.+?)\r?$", RegexOptions.Multiline);
+        private const string TokenCacheKey = "Token";
+        private const string CarIdCacheKey = "CarId";
+        private const string WakeUpUrl = "/wake_up";
+
+        public TeslaService(
+            HttpClient client,
+            IOptions<TeslaOptions> options,
+            IMemoryCache cache,
+            ILogger<TeslaService> logger
+            )
+        {
+            _client = client;
+            _options = options.Value;
+            _cache = cache;
+            _logger = logger;
+        }
+
+        public async Task UnlockChargePort()
+        {
+            _logger.LogInformation("Unlocking charge port");
+            var chargeState = await RunCommand<ChargeState>("/data_request/charge_state", HttpMethod.Get);
+            if (!chargeState.ChargePortDoorOpen)
+            {
+                _logger.LogInformation("Charge port is not open");
+            }
+            else if (chargeState.ChargePortLatch != "Engaged")
+            {
+                _logger.LogInformation("Charge port latch is already disengaged");
+            }
+            else if (chargeState.ChargingState == "Charging")
+            {
+                _logger.LogInformation("Car is currently charging");
+            }
+            else
+            {
+                _logger.LogInformation("Charge port is opened and engaged, unlocking");
+                var openCommand = await RunCommand<Command>("/command/charge_port_door_open", HttpMethod.Post);
+                if (!openCommand.Result)
+                {
+                    var err = $"Charge port failed to unlock: {openCommand.Reason}";
+                    _logger.LogError(err);
+                    throw new Exception(err);
+                }
+                else
+                {
+                    _logger.LogInformation("Charge port unlocked");
+                }
+            }
+        }
+
+        public async Task ManualChargePort()
+        {
+            _logger.LogInformation("Manual charge port");
+            var chargeState = await RunCommand<ChargeState>("/data_request/charge_state", HttpMethod.Get);
+            var open = true;
+            if (chargeState.ChargePortDoorOpen && chargeState.ChargePortLatch != "Engaged")
+            {
+                _logger.LogInformation("Charge port door open but unlatched, closing");
+                open = false;
+            }
+            else if (chargeState.ChargingState == "Charging")
+            {
+                _logger.LogInformation("Car currently charging, stopping");
+                var chargeStopCommand = await RunCommand<Command>("/command/charge_stop", HttpMethod.Post);
+                if (!chargeStopCommand.Result)
+                {
+                    var err = $"Charge stop failed: {chargeStopCommand.Reason}";
+                    _logger.LogError(err);
+                    throw new Exception(err);
+                }
+                else
+                {
+                    _logger.LogInformation("Car charging stopped");
+                }
+            }
+
+            var chargePortDoorCommand = await RunCommand<Command>($"/command/charge_port_door_{(open ? "open" : "close")}", HttpMethod.Post);
+            if (!chargePortDoorCommand.Result)
+            {
+                var err = $"Charge port action failed: ${chargePortDoorCommand.Reason}";
+                _logger.LogError(err);
+                throw new Exception(err);
+            }
+            else
+            {
+                _logger.LogInformation($"Charge port door {(open ? "opened" : "closed")}");
+            }
+        }
+
+        public async Task OpenTrunk(bool front)
+        {
+            _logger.LogInformation($"Opening {(front ? "hood" : "boot")}");
+            var openTrunkCommand = await RunCommand<Command>("/command/actuate_trunk", HttpMethod.Post, new { which_trunk = front ? "front" : "rear" });
+            if (!openTrunkCommand.Result)
+            {
+                var err = $"Open trunk action failed: ${openTrunkCommand.Reason}";
+                _logger.LogError(err);
+                throw new Exception(err);
+            }
+            else
+            {
+                _logger.LogInformation($"{(front ? "Hood" : "Boot")} opened");
+            }
+        }
+
+        private async Task<T> RunCommand<T>(string url, HttpMethod method, object data = null) where T : class
+        {
+            if (!_cache.TryGetValue<string>(CarIdCacheKey, out var carId) && !string.IsNullOrEmpty(url))
+            {
+                var vehicles = await RunCommand<List<Vehicle>>(string.Empty, HttpMethod.Get);
+                var vehicle = vehicles.FirstOrDefault(x => x.VIN == _options.VIN);
+                if (vehicle == null)
+                {
+                    throw new Exception($"Could not find car with VIN {_options.VIN}");
+                }
+                carId = vehicle.Id;
+                _cache.Set(CarIdCacheKey, carId);
+            }
+
+            var message = new HttpRequestMessage()
+            {
+                Method = method,
+                RequestUri = new Uri(_client.BaseAddress, $"/api/1/vehicles/{carId}{url}")
+            };
+            if (data != null)
+            {
+                message.Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
+            }
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetBearerToken());
+            var response = await _client.SendAsync(message);
+
+            if (url != WakeUpUrl)
+            {
+                if (response.StatusCode == System.Net.HttpStatusCode.RequestTimeout) // Car is asleep
+                {
+                    _logger.LogInformation("Car is asleep, waking");
+                    var wakeTries = 0;
+                    while (true)
+                    {
+                        var wakeUpResponse = await RunCommand<WakeUp>(WakeUpUrl, HttpMethod.Post);
+                        if (wakeUpResponse.State == "online")
+                        {
+                            break;
+                        }
+                        wakeTries++;
+                        if (wakeTries == 10)
+                        {
+                            throw new Exception("Failed to wake car");
+                        }
+                        await Task.Delay(TimeSpan.FromSeconds(5));
+                    }
+                    _logger.LogInformation("Car is awake, running original command");
+                    return await RunCommand<T>(url, method, data);
+                }
+                response.EnsureSuccessStatusCode();
+            }
+
+            var teslaResponse = await response.Content.ReadFromJsonAsync<TeslaResponse<T>>();
+            return teslaResponse.Response;
+        }
+
+        private async Task<string> GetBearerToken()
+        {
+            if (!_cache.TryGetValue<TokenResponse>(TokenCacheKey, out var tokenResponse))
+            {
+                var response = await _client.GetAsync(_options.OAuthClientUrl);
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                var matches = ClientUrlRegex.Matches(content);
+                var clientId = matches[0].Groups[1].Value;
+                var clientSecret = matches[1].Groups[1].Value;
+
+                response = await _client.PostAsync($"oauth/token?grant_type=password&client_id={clientId}&client_secret={clientSecret}&email={_options.Username}&password={_options.Password}", null);
+                response.EnsureSuccessStatusCode();
+
+                tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+
+                _cache.Set(TokenCacheKey, tokenResponse, TimeSpan.FromSeconds(tokenResponse.ExpiresIn - 30));
+            }
+
+            return tokenResponse.AccessToken;
+        }
+
+        private class TokenResponse
+        {
+            [JsonPropertyName("access_token")]
+            public string AccessToken { get; set; }
+
+            [JsonPropertyName("token_type")]
+            public string TokenType { get; set; }
+
+            [JsonPropertyName("expires_in")]
+            public int ExpiresIn { get; set; }
+
+            [JsonPropertyName("refresh_token")]
+            public string RefreshToken { get; set; }
+
+            [JsonPropertyName("created_at")]
+            public long CreatedAt { get; set; }
+        }
+
+        private class TeslaResponse<T>
+        {
+            [JsonPropertyName("response")]
+            public T Response { get; set; }
+        }
+
+        private class WakeUp
+        {
+            [JsonPropertyName("state")]
+            public string State { get; set; }
+        }
+
+        private class Vehicle
+        {
+            [JsonPropertyName("id_s")]
+            public string Id { get; set; }
+
+            [JsonPropertyName("vin")]
+            public string VIN { get; set; }
+        }
+
+        private class ChargeState
+        {
+            [JsonPropertyName("charge_port_door_open")]
+            public bool ChargePortDoorOpen { get; set; }
+
+            [JsonPropertyName("charge_port_latch")]
+            public string ChargePortLatch { get; set; }
+
+            [JsonPropertyName("charging_state")]
+            public string ChargingState { get; set; }
+        }
+
+        private class Command
+        {
+            [JsonPropertyName("result")]
+            public bool Result { get; set; }
+
+            [JsonPropertyName("reason")]
+            public string Reason { get; set; }
+        }
+    }
+}
