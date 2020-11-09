@@ -1,6 +1,4 @@
 using HomeAutomation.Web.Data;
-using HomeAutomation.Web.Helpers;
-using HomeAutomation.Web.Helpers.Interfaces;
 using HomeAutomation.Web.Middleware;
 using HomeAutomation.Web.Services;
 using HomeAutomation.Web.Services.Interfaces;
@@ -25,10 +23,12 @@ namespace HomeAutomation.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddTransient<IWakeOnLANHelper, WakeOnLANHelper>();
+            services.AddTransient<IWakeOnLANService, WakeOnLANService>();
+            services.AddHttpClient<INotificationService, PushoverService>(x => x.BaseAddress = new Uri(_config.GetValue<string>("Pushover:BaseUrl")));
             services.AddHttpClient<ITeslaService, TeslaService>(x => x.BaseAddress = new Uri(_config.GetValue<string>("Tesla:BaseUrl")));
             services.Configure<ComputerOptions>(_config.GetSection("Computer"));
             services.Configure<TeslaOptions>(_config.GetSection("Tesla"));
+            services.Configure<PushoverOptions>(_config.GetSection("Pushover"));
             services.AddMemoryCache();
         }
 

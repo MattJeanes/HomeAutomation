@@ -63,9 +63,7 @@ namespace HomeAutomation.Web.Services
                 var openCommand = await RunCommand<Command>("/command/charge_port_door_open", HttpMethod.Post);
                 if (!openCommand.Result)
                 {
-                    var err = $"Charge port failed to unlock: {openCommand.Reason}";
-                    _logger.LogError(err);
-                    throw new Exception(err);
+                    throw new Exception($"Charge port failed to unlock: {openCommand.Reason}");
                 }
                 else
                 {
@@ -74,9 +72,9 @@ namespace HomeAutomation.Web.Services
             }
         }
 
-        public async Task ManualChargePort()
+        public async Task ToggleChargePort()
         {
-            _logger.LogInformation("Manual charge port");
+            _logger.LogInformation("Toggle charge port");
             var chargeState = await RunCommand<ChargeState>("/data_request/charge_state", HttpMethod.Get);
             var open = true;
             if (chargeState.ChargePortDoorOpen && chargeState.ChargePortLatch != "Engaged")
@@ -90,9 +88,7 @@ namespace HomeAutomation.Web.Services
                 var chargeStopCommand = await RunCommand<Command>("/command/charge_stop", HttpMethod.Post);
                 if (!chargeStopCommand.Result)
                 {
-                    var err = $"Charge stop failed: {chargeStopCommand.Reason}";
-                    _logger.LogError(err);
-                    throw new Exception(err);
+                    throw new Exception($"Charge stop failed: {chargeStopCommand.Reason}");
                 }
                 else
                 {
@@ -103,9 +99,7 @@ namespace HomeAutomation.Web.Services
             var chargePortDoorCommand = await RunCommand<Command>($"/command/charge_port_door_{(open ? "open" : "close")}", HttpMethod.Post);
             if (!chargePortDoorCommand.Result)
             {
-                var err = $"Charge port action failed: ${chargePortDoorCommand.Reason}";
-                _logger.LogError(err);
-                throw new Exception(err);
+                throw new Exception($"Charge port command failed: ${chargePortDoorCommand.Reason}");
             }
             else
             {
@@ -119,13 +113,25 @@ namespace HomeAutomation.Web.Services
             var openTrunkCommand = await RunCommand<Command>("/command/actuate_trunk", HttpMethod.Post, new { which_trunk = front ? "front" : "rear" });
             if (!openTrunkCommand.Result)
             {
-                var err = $"Open trunk action failed: ${openTrunkCommand.Reason}";
-                _logger.LogError(err);
-                throw new Exception(err);
+                throw new Exception($"Open trunk command failed: ${openTrunkCommand.Reason}");
             }
             else
             {
                 _logger.LogInformation($"{(front ? "Hood" : "Boot")} opened");
+            }
+        }
+
+        public async Task SetClimate(bool enable)
+        {
+            _logger.LogInformation($"{(enable ? "Starting" : "Stopping")} climate");
+            var climateCommand = await RunCommand<Command>($"/command/auto_conditioning_{(enable ? "start" : "stop")}", HttpMethod.Post);
+            if (!climateCommand.Result)
+            {
+                throw new Exception($"Climate control command failed: ${climateCommand.Reason}");
+            }
+            else
+            {
+                _logger.LogInformation($"Climate {(enable ? "started" : "stopped")}");
             }
         }
 

@@ -1,12 +1,12 @@
-﻿using HomeAutomation.Web.Helpers.Interfaces;
+﻿using HomeAutomation.Web.Services.Interfaces;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace HomeAutomation.Web.Helpers
+namespace HomeAutomation.Web.Services
 {
-    public class WakeOnLANHelper : IWakeOnLANHelper
+    public class WakeOnLANService : IWakeOnLANService
     {
         public async Task WakeAsync(string macAddress, string broadcastIP)
         {
