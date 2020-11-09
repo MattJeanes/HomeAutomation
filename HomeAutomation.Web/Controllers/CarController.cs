@@ -114,5 +114,21 @@ namespace HomeAutomation.Web.Controllers
                 throw;
             }
         }
+
+        [HttpPost]
+        [Route("SetTemperature/{temperature:int}")]
+        public async Task SetTemperature([FromRoute]float temperature)
+        {
+            try
+            {
+                await _notificationService.SendMessage($"Setting car temperature to {temperature} degrees", MessagePriority.HighPriority);
+                await _teslaService.SetTemperature(temperature);
+            }
+            catch (Exception e)
+            {
+                await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}");
+                throw;
+            }
+        }
     }
 }

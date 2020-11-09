@@ -135,6 +135,34 @@ namespace HomeAutomation.Web.Services
             }
         }
 
+        public async Task SetTemperature(float temperature)
+        {
+            _logger.LogInformation($"Setting climate temperature to {temperature} degrees");
+            var climateState = await RunCommand<ClimateState>("/data_request/climate_state", HttpMethod.Get);
+            if (!climateState.IsClimateOn)
+            {
+                _logger.LogInformation("Climate is not on, starting");
+                var climateStartCommand = await RunCommand<Command>("/command/auto_conditioning_start", HttpMethod.Post);
+                if (!climateStartCommand.Result)
+                {
+                    throw new Exception($"Climate start command failed: ${climateStartCommand.Reason}");
+                }
+                else
+                {
+                    _logger.LogInformation($"Climate started");
+                }
+            }
+            var climateTemperatureCommand = await RunCommand<Command>("/command/set_temps", HttpMethod.Post, new { driver_temp = temperature, passenger_temp = temperature });
+            if (!climateTemperatureCommand.Result)
+            {
+                throw new Exception($"Climate temperature command failed: ${climateTemperatureCommand.Reason}");
+            }
+            else
+            {
+                _logger.LogInformation($"Climate temperature set");
+            }
+        }
+
         private async Task<T> RunCommand<T>(string url, HttpMethod method, object data = null) where T : class
         {
             if (!_cache.TryGetValue<string>(CarIdCacheKey, out var carId) && !string.IsNullOrEmpty(url))
@@ -271,6 +299,12 @@ namespace HomeAutomation.Web.Services
 
             [JsonPropertyName("reason")]
             public string Reason { get; set; }
+        }
+
+        private class ClimateState
+        {
+            [JsonPropertyName("is_climate_on")]
+            public bool IsClimateOn { get; set; }
         }
     }
 }
