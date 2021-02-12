@@ -31,7 +31,7 @@ namespace HomeAutomation.Web.Controllers
             }
             catch (Exception e)
             {
-                await _notificationService.SendMessage($"Failed to unlock car charge port:\n{e}");
+                await _notificationService.SendMessage($"Failed to unlock car charge port:\n{e}", MessagePriority.HighPriority);
                 throw;
             }
         }
@@ -46,7 +46,7 @@ namespace HomeAutomation.Web.Controllers
             }
             catch (Exception e)
             {
-                await _notificationService.SendMessage($"Failed to toggle car charge port:\n{e}");
+                await _notificationService.SendMessage($"Failed to toggle car charge port:\n{e}", MessagePriority.HighPriority);
                 throw;
             }
         }
@@ -62,7 +62,7 @@ namespace HomeAutomation.Web.Controllers
             }
             catch (Exception e)
             {
-                await _notificationService.SendMessage($"Failed to open car boot:\n{e}");
+                await _notificationService.SendMessage($"Failed to open car boot:\n{e}", MessagePriority.HighPriority);
                 throw;
             }
         }
@@ -78,7 +78,7 @@ namespace HomeAutomation.Web.Controllers
             }
             catch (Exception e)
             {
-                await _notificationService.SendMessage($"Failed to open car hood:\n{e}");
+                await _notificationService.SendMessage($"Failed to open car hood:\n{e}", MessagePriority.HighPriority);
                 throw;
             }
         }
@@ -94,7 +94,7 @@ namespace HomeAutomation.Web.Controllers
             }
             catch (Exception e)
             {
-                await _notificationService.SendMessage($"Failed to turn on car climate:\n{e}");
+                await _notificationService.SendMessage($"Failed to turn on car climate:\n{e}", MessagePriority.HighPriority);
                 throw;
             }
         }
@@ -110,7 +110,7 @@ namespace HomeAutomation.Web.Controllers
             }
             catch (Exception e)
             {
-                await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}");
+                await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}", MessagePriority.HighPriority);
                 throw;
             }
         }
@@ -126,7 +126,7 @@ namespace HomeAutomation.Web.Controllers
             }
             catch (Exception e)
             {
-                await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}");
+                await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}", MessagePriority.HighPriority);
                 throw;
             }
         }
