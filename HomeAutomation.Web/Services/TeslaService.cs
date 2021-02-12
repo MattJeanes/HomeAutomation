@@ -230,9 +230,28 @@ namespace HomeAutomation.Web.Services
                 var clientId = matches[0].Groups[1].Value;
                 var clientSecret = matches[1].Groups[1].Value;
 
-                response = await _client.PostAsync($"oauth/token?grant_type=password&client_id={clientId}&client_secret={clientSecret}&email={_options.Username}&password={_options.Password}", null);
+                var requestContent = new StringContent(JsonSerializer.Serialize(new
+                {
+                    grant_type = "refresh_token",
+                    client_id = "ownerapi",
+                    refresh_token = _options.RefreshToken,
+                    scope = "openid email offline_access"
+                }), Encoding.UTF8, "application/json");
+                requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                response = await _client.PostAsync(_options.AuthTokenUrl, requestContent);
                 response.EnsureSuccessStatusCode();
+                tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
 
+                var message = new HttpRequestMessage(HttpMethod.Post, "oauth/token");
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
+                message.Content = new StringContent(JsonSerializer.Serialize(new
+                {
+                    grant_type = "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                    client_id = clientId,
+                    client_secret = clientSecret
+                }), Encoding.UTF8, "application/json");
+                response = await _client.SendAsync(message);
+                response.EnsureSuccessStatusCode();
                 tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
 
                 _cache.Set(TokenCacheKey, tokenResponse, TimeSpan.FromSeconds(tokenResponse.ExpiresIn - 30));
