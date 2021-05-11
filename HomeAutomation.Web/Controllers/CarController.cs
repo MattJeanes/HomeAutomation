@@ -23,112 +23,133 @@ namespace HomeAutomation.Web.Controllers
 
         [HttpPost]
         [Route("UnlockChargePort")]
-        public async Task UnlockChargePort()
+        public ActionResult UnlockChargePort()
         {
-            try
+            Response.OnCompleted(async () =>
             {
-                await _teslaService.UnlockChargePort();
-            }
-            catch (Exception e)
-            {
-                await _notificationService.SendMessage($"Failed to unlock car charge port:\n{e}", MessagePriority.HighPriority);
-                throw;
-            }
+                try
+                {
+                    await _teslaService.UnlockChargePort();
+                }
+                catch (Exception e)
+                {
+                    await _notificationService.SendMessage($"Failed to unlock car charge port:\n{e}", MessagePriority.HighPriority);
+                }
+            });
+            return Accepted();
         }
 
         [HttpPost]
         [Route("ToggleChargePort")]
-        public async Task ToggleChargePort()
+        public ActionResult ToggleChargePort()
         {
-            try
+            Response.OnCompleted(async () =>
             {
-                await _teslaService.ToggleChargePort();
-            }
-            catch (Exception e)
-            {
-                await _notificationService.SendMessage($"Failed to toggle car charge port:\n{e}", MessagePriority.HighPriority);
-                throw;
-            }
+                try
+                {
+                    await _teslaService.ToggleChargePort();
+                }
+                catch (Exception e)
+                {
+                    await _notificationService.SendMessage($"Failed to toggle car charge port:\n{e}", MessagePriority.HighPriority);
+                }
+            });
+            return Accepted();
         }
 
         [HttpPost]
         [Route("OpenBoot")]
-        public async Task OpenBoot()
+        public ActionResult OpenBoot()
         {
-            try
+            Response.OnCompleted(async () =>
             {
-                await _notificationService.SendMessage($"Opening car boot", MessagePriority.HighPriority);
-                await _teslaService.OpenTrunk(false);
-            }
-            catch (Exception e)
-            {
-                await _notificationService.SendMessage($"Failed to open car boot:\n{e}", MessagePriority.HighPriority);
-                throw;
-            }
+                try
+                {
+                    await _notificationService.SendMessage($"Opening car boot", MessagePriority.HighPriority);
+                    await _teslaService.OpenTrunk(false);
+                }
+                catch (Exception e)
+                {
+                    await _notificationService.SendMessage($"Failed to open car boot:\n{e}", MessagePriority.HighPriority);
+                }
+            });
+            return Accepted();
         }
 
         [HttpPost]
         [Route("OpenHood")]
-        public async Task OpenHood()
+        public ActionResult OpenHood()
         {
-            try
+            Response.OnCompleted(async () =>
             {
-                await _notificationService.SendMessage($"Opening car hood", MessagePriority.HighPriority);
-                await _teslaService.OpenTrunk(true);
-            }
-            catch (Exception e)
-            {
-                await _notificationService.SendMessage($"Failed to open car hood:\n{e}", MessagePriority.HighPriority);
-                throw;
-            }
+                try
+                {
+                    await _notificationService.SendMessage($"Opening car hood", MessagePriority.HighPriority);
+                    await _teslaService.OpenTrunk(true);
+                }
+                catch (Exception e)
+                {
+                    await _notificationService.SendMessage($"Failed to open car hood:\n{e}", MessagePriority.HighPriority);
+                }
+            });
+            return Accepted();
         }
 
         [HttpPost]
         [Route("StartClimate")]
-        public async Task StartClimate()
+        public ActionResult StartClimate()
         {
-            try
+            Response.OnCompleted(async () =>
             {
-                await _notificationService.SendMessage($"Turning on car climate", MessagePriority.HighPriority);
-                await _teslaService.SetClimate(true);
-            }
-            catch (Exception e)
-            {
-                await _notificationService.SendMessage($"Failed to turn on car climate:\n{e}", MessagePriority.HighPriority);
-                throw;
-            }
+                try
+                {
+                    await _notificationService.SendMessage($"Turning on car climate", MessagePriority.HighPriority);
+                    await _teslaService.SetClimate(true);
+                }
+                catch (Exception e)
+                {
+                    await _notificationService.SendMessage($"Failed to turn on car climate:\n{e}", MessagePriority.HighPriority);
+                }
+            });
+            return Accepted();
         }
 
         [HttpPost]
         [Route("StopClimate")]
-        public async Task StopClimate()
+        public ActionResult StopClimate()
         {
-            try
+            Response.OnCompleted(async () =>
             {
-                await _notificationService.SendMessage($"Turning off car climate", MessagePriority.HighPriority);
-                await _teslaService.SetClimate(false);
-            }
-            catch (Exception e)
-            {
-                await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}", MessagePriority.HighPriority);
-                throw;
-            }
+                try
+                {
+                    await _notificationService.SendMessage($"Turning off car climate", MessagePriority.HighPriority);
+                    await _teslaService.SetClimate(false);
+                }
+                catch (Exception e)
+                {
+                    await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}", MessagePriority.HighPriority);
+                }
+            });
+            return Accepted();
         }
 
         [HttpPost]
         [Route("SetTemperature/{temperature:int}")]
-        public async Task SetTemperature([FromRoute]float temperature)
+        public ActionResult SetTemperature([FromRoute] float temperature)
         {
-            try
+            Response.OnCompleted(async () =>
             {
-                await _notificationService.SendMessage($"Setting car temperature to {temperature} degrees", MessagePriority.HighPriority);
-                await _teslaService.SetTemperature(temperature);
-            }
-            catch (Exception e)
-            {
-                await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}", MessagePriority.HighPriority);
-                throw;
-            }
+                try
+                {
+                    await _notificationService.SendMessage($"Setting car temperature to {temperature} degrees", MessagePriority.HighPriority);
+                    await _teslaService.SetTemperature(temperature);
+                }
+                catch (Exception e)
+                {
+                    await _notificationService.SendMessage($"Failed to turn off car climate:\n{e}", MessagePriority.HighPriority);
+                }
+            });
+            return Accepted();
         }
     }
 }
