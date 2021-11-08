@@ -7,6 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v1.8.2
+      with:
+        dotnet-version: '6.0.x'
         
     - name: Build project
       run: |
@@ -20,11 +25,11 @@ jobs:
         for appname in HomeAutomation.Web; do
           app=`echo $appname | tr '[:upper:]' '[:lower:]'`
           echo "Building $appname docker amd64"
-          docker build -t $app:amd64 -f "$appname/Dockerfile" . --build-arg arch=buster-slim
+          docker build -t $app:amd64 -f "$appname/Dockerfile" . --build-arg arch=bullseye-slim
           echo "Building $appname docker arm32v7"
-          docker build -t $app:arm32v7 -f "$appname/Dockerfile" . --build-arg arch=buster-slim-arm32v7
+          docker build -t $app:arm32v7 -f "$appname/Dockerfile" . --build-arg arch=bullseye-slim-arm32v7
           echo "Building $appname docker arm64v8"
-          docker build -t $app:arm64v8 -f "$appname/Dockerfile" . --build-arg arch=buster-slim-arm64v8
+          docker build -t $app:arm64v8 -f "$appname/Dockerfile" . --build-arg arch=bullseye-slim-arm64v8
         done
       
     - name: Upload a Build Artifact
