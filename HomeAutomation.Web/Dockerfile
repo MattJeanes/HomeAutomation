@@ -1,11 +1,11 @@
-ARG arch=buster-slim
+ARG arch=bullseye-slim
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-${arch} AS base
+FROM mcr.microsoft.com/dotnet/core/aspnet:6.0-${arch} AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:6.0-bullseye AS build
 WORKDIR /src
 COPY ["HomeAutomation.Web/HomeAutomation.Web.csproj", "HomeAutomation.Web/"]
 RUN dotnet restore "HomeAutomation.Web/HomeAutomation.Web.csproj"
