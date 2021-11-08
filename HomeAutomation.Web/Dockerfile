@@ -5,7 +5,7 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0-${arch} AS build
 WORKDIR /src
 COPY ["HomeAutomation.Web/HomeAutomation.Web.csproj", "HomeAutomation.Web/"]
 RUN dotnet restore "HomeAutomation.Web/HomeAutomation.Web.csproj"
