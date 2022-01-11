@@ -1,10 +1,18 @@
-﻿namespace HomeAutomation.Web.Data
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace HomeAutomation.Web.Data;
+
+public class TeslaOptions
 {
-    public class TeslaOptions
-    {
-        public string OAuthClientUrl { get; set; }
-        public string AuthTokenUrl { get; set; }
-        public string RefreshToken { get; set; }
-        public string VIN { get; set; }
-    }
+    [NotNull]
+    public string? OAuthClientUrl { get; set; }
+
+    [NotNull]
+    public string? AuthTokenUrl { get; set; }
+
+    [NotNull]
+    public string? RefreshToken { get; set; }
+
+    [NotNull]
+    public string? VIN { get; set; }
 }

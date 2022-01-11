@@ -1,10 +1,8 @@
 ﻿using HomeAutomation.Web.Data;
-using System.Threading.Tasks;
 
-namespace HomeAutomation.Web.Services.Interfaces
+namespace HomeAutomation.Web.Services.Interfaces;
+
+public interface INotificationService
 {
-    public interface INotificationService
-    {
-        Task SendMessage(string message, MessagePriority messagePriority = MessagePriority.Normal);
-    }
+    Task SendMessage(string message, MessagePriority messagePriority = MessagePriority.Normal);
 }

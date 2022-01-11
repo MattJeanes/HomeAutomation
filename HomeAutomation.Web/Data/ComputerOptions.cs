@@ -1,8 +1,12 @@
-﻿namespace HomeAutomation.Web.Data
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace HomeAutomation.Web.Data;
+
+public class ComputerOptions
 {
-    public class ComputerOptions
-    {
-        public string MACAddress { get; set; }
-        public string BroadcastIP { get; set; }
-    }
+    [NotNull]
+    public string? MACAddress { get; set; }
+
+    [NotNull]
+    public string? BroadcastIP { get; set; }
 }

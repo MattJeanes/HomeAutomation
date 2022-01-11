@@ -1,10 +1,9 @@
-﻿namespace HomeAutomation.Web.Data
+﻿namespace HomeAutomation.Web.Data;
+
+public enum MessagePriority
 {
-    public enum MessagePriority
-    {
-        Silent,
-        Normal,
-        HighPriority,
-        Critical
-    }
+    Silent,
+    Normal,
+    HighPriority,
+    Critical
 }

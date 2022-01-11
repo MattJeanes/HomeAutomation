@@ -1,8 +1,12 @@
-﻿namespace HomeAutomation.Web.Data
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace HomeAutomation.Web.Data;
+
+public class PushoverOptions
 {
-    public class PushoverOptions
-    {
-        public string ApiKey { get; set; }
-        public string UserKey { get; set; }
-    }
+    [NotNull]
+    public string? ApiKey { get; set; }
+
+    [NotNull]
+    public string? UserKey { get; set; }
 }

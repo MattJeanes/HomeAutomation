@@ -1,13 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿namespace HomeAutomation.Web.Services.Interfaces;
 
-namespace HomeAutomation.Web.Services.Interfaces
+public interface ITeslaService
 {
-    public interface ITeslaService
-    {
-        Task ToggleChargePort();
-        Task OpenTrunk(bool front);
-        Task UnlockChargePort();
-        Task SetClimate(bool enable);
-        Task SetTemperature(float temperature);
-    }
+    Task ToggleChargePort();
+    Task OpenTrunk(bool front);
+    Task UnlockChargePort();
+    Task SetClimate(bool enable);
+    Task SetTemperature(float temperature);
 }
