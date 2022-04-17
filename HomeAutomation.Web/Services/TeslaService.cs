@@ -244,22 +244,6 @@ public class TeslaService : ITeslaService
                 throw new Exception("Failed to parse Tesla API repsonse");
             }
 
-            var message = new HttpRequestMessage(HttpMethod.Post, "oauth/token");
-            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
-            message.Content = new StringContent(JsonSerializer.Serialize(new
-            {
-                grant_type = "urn:ietf:params:oauth:grant-type:jwt-bearer",
-                client_id = clientId,
-                client_secret = clientSecret
-            }), Encoding.UTF8, "application/json");
-            response = await _client.SendAsync(message);
-            response.EnsureSuccessStatusCode();
-            tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
-            if (tokenResponse == null)
-            {
-                throw new Exception("Failed to parse Tesla API repsonse");
-            }
-
             _cache.Set(TokenCacheKey, tokenResponse, TimeSpan.FromSeconds(tokenResponse.ExpiresIn - 30));
         }
 
