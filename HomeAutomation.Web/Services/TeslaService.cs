@@ -2,7 +2,6 @@
 using HomeAutomation.Web.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -157,7 +156,7 @@ public class TeslaService : ITeslaService
         }
     }
 
-    private async Task<T> RunCommand<T>(string url, HttpMethod method, object? data = null) where T : class
+    private async Task<T> RunCommand<T>(string url, HttpMethod method, object data = null) where T : class
     {
         if (!_cache.TryGetValue<string>(CarIdCacheKey, out var carId) && !string.IsNullOrEmpty(url))
         {
@@ -253,19 +252,16 @@ public class TeslaService : ITeslaService
     private class TokenResponse
     {
         [JsonPropertyName("access_token")]
-        [NotNull]
-        public string? AccessToken { get; set; }
+        public string AccessToken { get; set; }
 
         [JsonPropertyName("token_type")]
-        [NotNull]
-        public string? TokenType { get; set; }
+        public string TokenType { get; set; }
 
         [JsonPropertyName("expires_in")]
         public int ExpiresIn { get; set; }
 
         [JsonPropertyName("refresh_token")]
-        [NotNull]
-        public string? RefreshToken { get; set; }
+        public string RefreshToken { get; set; }
 
         [JsonPropertyName("created_at")]
         public long CreatedAt { get; set; }
@@ -274,26 +270,22 @@ public class TeslaService : ITeslaService
     private class TeslaResponse<T>
     {
         [JsonPropertyName("response")]
-        [NotNull]
-        public T? Response { get; set; }
+        public T Response { get; set; }
     }
 
     private class WakeUp
     {
         [JsonPropertyName("state")]
-        [NotNull]
-        public string? State { get; set; }
+        public string State { get; set; }
     }
 
     private class Vehicle
     {
         [JsonPropertyName("id_s")]
-        [NotNull]
-        public string? Id { get; set; }
+        public string Id { get; set; }
 
         [JsonPropertyName("vin")]
-        [NotNull]
-        public string? VIN { get; set; }
+        public string VIN { get; set; }
     }
 
     private class ChargeState
@@ -302,12 +294,10 @@ public class TeslaService : ITeslaService
         public bool ChargePortDoorOpen { get; set; }
 
         [JsonPropertyName("charge_port_latch")]
-        [NotNull]
-        public string? ChargePortLatch { get; set; }
+        public string ChargePortLatch { get; set; }
 
         [JsonPropertyName("charging_state")]
-        [NotNull]
-        public string? ChargingState { get; set; }
+        public string ChargingState { get; set; }
     }
 
     private class Command
@@ -316,8 +306,7 @@ public class TeslaService : ITeslaService
         public bool Result { get; set; }
 
         [JsonPropertyName("reason")]
-        [NotNull]
-        public string? Reason { get; set; }
+        public string Reason { get; set; }
     }
 
     private class ClimateState

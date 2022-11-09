@@ -1,11 +1,11 @@
 ARG arch=bullseye-slim
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-${arch} AS base
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-${arch} AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim AS build
 WORKDIR /src
 COPY ["HomeAutomation.Web/HomeAutomation.Web.csproj", "HomeAutomation.Web/"]
 RUN dotnet restore "HomeAutomation.Web/HomeAutomation.Web.csproj"

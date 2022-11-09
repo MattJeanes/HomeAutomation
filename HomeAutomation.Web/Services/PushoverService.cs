@@ -2,7 +2,6 @@
 using HomeAutomation.Web.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace HomeAutomation.Web.Services;
@@ -91,8 +90,7 @@ public class PushoverService : INotificationService
     private class PushoverResponse
     {
         [JsonPropertyName("errors")]
-        [NotNull]
-        public List<string>? Errors { get; set; }
+        public List<string> Errors { get; set; }
 
         [JsonPropertyName("status")]
         public PushoverResponseStatus Status { get; set; }
