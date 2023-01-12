@@ -79,6 +79,6 @@ jobs:
           done
         done
       env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         DOCKER_CLI_EXPERIMENTAL: enabled
