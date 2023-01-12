@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.8.2
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '7.0.x'
         
@@ -33,25 +33,25 @@ jobs:
         done
       
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: HomeAutomation-Web-linux-x64
         path: ./output/HomeAutomation-Web-linux-x64
     
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: HomeAutomation-Web-linux-arm64
         path: ./output/HomeAutomation-Web-linux-arm64
         
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: HomeAutomation-Web-linux-arm
         path: ./output/HomeAutomation-Web-linux-arm
         
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: HomeAutomation-Web-win-x64
         path: ./output/HomeAutomation-Web-win-x64
