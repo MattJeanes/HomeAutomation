@@ -220,13 +220,6 @@ public class TeslaService : ITeslaService
     {
         if (!_cache.TryGetValue<TokenResponse>(TokenCacheKey, out var tokenResponse))
         {
-            var response = await _client.GetAsync(_options.OAuthClientUrl);
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            var matches = ClientUrlRegex.Matches(content);
-            var clientId = matches[0].Groups[1].Value;
-            var clientSecret = matches[1].Groups[1].Value;
-
             var requestContent = new StringContent(JsonSerializer.Serialize(new
             {
                 grant_type = "refresh_token",
@@ -235,7 +228,7 @@ public class TeslaService : ITeslaService
                 scope = "openid email offline_access"
             }), Encoding.UTF8, "application/json");
             requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            response = await _client.PostAsync(_options.AuthTokenUrl, requestContent);
+            var response = await _client.PostAsync(_options.AuthTokenUrl, requestContent);
             response.EnsureSuccessStatusCode();
             tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
             if (tokenResponse == null)

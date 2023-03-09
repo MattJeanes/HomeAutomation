@@ -8,7 +8,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:56125;http://localhost:56124"
+      "applicationUrl": "http://localhost:54588"
     },
     "Docker": {
       "commandName": "Docker",
