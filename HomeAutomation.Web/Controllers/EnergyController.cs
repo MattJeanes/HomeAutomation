@@ -45,7 +45,7 @@ public class EnergyController : BaseController
                 _logger.LogError(ex, "Failed to parse MQTT response");
                 return Task.CompletedTask;
             }
-            var receivedCorrelationId = tempResponse[_correlationIdProperty].ToString();
+            var receivedCorrelationId = tempResponse[_correlationIdProperty].GetValue<string>();
             if (receivedCorrelationId == correlationId)
             {
                 tempResponse.Remove(_correlationIdProperty);
@@ -74,6 +74,15 @@ public class EnergyController : BaseController
             }
         }
 
-        return Ok(response);
+        var success = response["success"].GetValue<bool>();
+
+        if (success)
+        {
+            return Ok(response);
+        }
+        else
+        {
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
     }
 }
