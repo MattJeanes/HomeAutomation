@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HomeAutomation.Web.Data;
+using Microsoft.AspNetCore.Mvc;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
@@ -25,6 +26,15 @@ public class EnergyController : BaseController
     [HttpPost("{**slug}")]
     public async Task<IActionResult> Invoke(string slug, [FromBody] JsonObject request)
     {
+        if (slug == "modbus/set")
+        {
+            return BadRequest(new InverterResponse
+            {
+                Success = false,
+                Message = "Raw modbus set commands are blocked over the HTTP Proxy"
+            });
+        }
+
         using var mqttClient = _mqttFactory.CreateMqttClient();
         await mqttClient.ConnectAsync(_mqttClientOptions);
         await mqttClient.SubscribeAsync("energy/solar/result");
