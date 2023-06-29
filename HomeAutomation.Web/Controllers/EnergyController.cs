@@ -13,7 +13,7 @@ public class EnergyController : BaseController
     private readonly MqttFactory _mqttFactory;
     private readonly MqttClientOptions _mqttClientOptions;
     private readonly ILogger<EnergyController> _logger;
-    private static string _correlationIdProperty = "correlationId";
+    private const string _correlationIdProperty = "correlationId";
 
     public EnergyController(MqttFactory mqttFactory, MqttClientOptions mqttClientOptions, ILogger<EnergyController> logger)
     {
