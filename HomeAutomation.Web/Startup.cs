@@ -2,6 +2,8 @@ using HomeAutomation.Web.Data;
 using HomeAutomation.Web.Middleware;
 using HomeAutomation.Web.Services;
 using HomeAutomation.Web.Services.Interfaces;
+using MQTTnet;
+using MQTTnet.Client;
 
 namespace HomeAutomation.Web;
 
@@ -16,7 +18,15 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        var mqttClientOptions = new MqttClientOptionsBuilder()
+            .WithClientId("homeautomation")
+            .WithTcpServer(_config.GetValue<string>("Mqtt:Server"))
+            .WithCredentials(_config.GetValue<string>("Mqtt:Username"), _config.GetValue<string>("Mqtt:Password"))
+            .Build();
+
         services.AddControllers();
+        services.AddSingleton<MqttFactory>();
+        services.AddSingleton(mqttClientOptions);
         services.AddTransient<IWakeOnLANService, WakeOnLANService>();
         services.AddHttpClient<INotificationService, PushoverService>(x => x.BaseAddress = new Uri(_config.GetValue<string>("Pushover:BaseUrl")));
         services.AddHttpClient<ITeslaService, TeslaService>(x => x.BaseAddress = new Uri(_config.GetValue<string>("Tesla:BaseUrl")));
