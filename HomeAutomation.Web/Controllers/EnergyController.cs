@@ -39,9 +39,6 @@ public class EnergyController : BaseController
         await mqttClient.ConnectAsync(_mqttClientOptions);
         await mqttClient.SubscribeAsync("energy/solar/result");
 
-        var correlationId = Guid.NewGuid().ToString();
-        request[_correlationIdProperty] = correlationId;
-
         JsonObject response = null;
         mqttClient.ApplicationMessageReceivedAsync += (message) =>
         {
@@ -54,12 +51,6 @@ public class EnergyController : BaseController
             {
                 _logger.LogError(ex, "Failed to parse MQTT response");
                 return Task.CompletedTask;
-            }
-            var receivedCorrelationId = tempResponse[_correlationIdProperty].GetValue<string>();
-            if (receivedCorrelationId == correlationId)
-            {
-                tempResponse.Remove(_correlationIdProperty);
-                response = tempResponse;
             }
             return Task.CompletedTask;
         };
