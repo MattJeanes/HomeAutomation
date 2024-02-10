@@ -156,12 +156,12 @@ public class TeslaService : ITeslaService
         }
     }
 
-    private async Task<T> RunCommand<T>(string url, HttpMethod method, object data = null) where T : class
+    private async Task<T> RunCommand<T>(string url, HttpMethod method, object data = null, bool useVehicleBaseUrl = true) where T : class
     {
-        if (!_cache.TryGetValue<string>(CarIdCacheKey, out var carId) && !string.IsNullOrEmpty(url))
+        if (!_cache.TryGetValue<string>(CarIdCacheKey, out var carId) && url != "/api/1/products")
         {
-            var vehicles = await RunCommand<List<Vehicle>>(string.Empty, HttpMethod.Get);
-            var vehicle = vehicles.FirstOrDefault(x => x.VIN == _options.VIN);
+            var products = await RunCommand<List<Product>>("/api/1/products", HttpMethod.Get, useVehicleBaseUrl: false);
+            var vehicle = products.FirstOrDefault(x => x.VIN == _options.VIN);
             if (vehicle == null)
             {
                 throw new Exception($"Could not find car with VIN {_options.VIN}");
@@ -173,7 +173,7 @@ public class TeslaService : ITeslaService
         var message = new HttpRequestMessage()
         {
             Method = method,
-            RequestUri = new Uri(_client.BaseAddress!, $"/api/1/vehicles/{carId}{url}")
+            RequestUri = new Uri(_client.BaseAddress!, useVehicleBaseUrl ? $"/api/1/vehicles/{carId}{url}" : url)
         };
         if (data != null)
         {
@@ -272,7 +272,7 @@ public class TeslaService : ITeslaService
         public string State { get; set; }
     }
 
-    private class Vehicle
+    private class Product
     {
         [JsonPropertyName("id_s")]
         public string Id { get; set; }
