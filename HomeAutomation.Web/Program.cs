@@ -24,6 +24,7 @@ builder.Services.AddHttpClient<ITeslaService, TeslaService>(x => x.BaseAddress =
 builder.Services.Configure<ComputerOptions>(builder.Configuration.GetSection("Computer"));
 builder.Services.Configure<TeslaOptions>(builder.Configuration.GetSection("Tesla"));
 builder.Services.Configure<PushoverOptions>(builder.Configuration.GetSection("Pushover"));
+builder.Services.Configure<PackageOptions>(builder.Configuration.GetSection("Package"));
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
