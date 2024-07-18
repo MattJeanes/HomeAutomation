@@ -2,10 +2,12 @@
 
 public class PackageResponse
 {
-    public PackageResponse(bool package)
+    public PackageResponse(string locationId, bool detected)
     {
-        Package = package;
+        LocationId = locationId;
+        Detected = detected;
     }
 
-    public bool Package { get; set; }
+    public string LocationId { get; set; }
+    public bool Detected { get; set; }
 }

@@ -2,6 +2,12 @@
 
 public class PackageOptions
 {
+    public class Location
+    {
+        public string Id { get; set; }
+        public string ImageUrl { get; set; }
+    }
+
     public string OpenAIApiKey { get; set; }
-    public List<string> ImageUrls { get; set; }
+    public List<Location> Locations { get; set; }
 }

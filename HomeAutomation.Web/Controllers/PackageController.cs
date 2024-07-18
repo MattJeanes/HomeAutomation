@@ -23,10 +23,10 @@ public class PackageController : BaseController
     {
         var openAI = new OpenAIAPI(new APIAuthentication(_options.OpenAIApiKey));
 
-        foreach (var url in _options.ImageUrls)
+        foreach (var location in _options.Locations)
         {
-            var image = await _httpClient.GetAsync(url);
-            var imageBytes = await image.Content.ReadAsByteArrayAsync();
+            var imageResponse = await _httpClient.GetAsync(location.ImageUrl);
+            var imageBytes = await imageResponse.Content.ReadAsByteArrayAsync();
 
             var chatRequest = new ChatRequest
             {
@@ -64,10 +64,10 @@ Do not say anything except 'true' or 'false', the output will be processed by co
             var responseText = response?.Choices?.FirstOrDefault()?.Message.TextContent;
             if (bool.Parse(responseText))
             {
-                return new PackageResponse(true);
+                return new PackageResponse(location.Id, true);
             }
         }
 
-        return new PackageResponse(false);
+        return new PackageResponse(null, false);
     }
 }
