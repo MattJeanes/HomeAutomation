@@ -41,11 +41,19 @@ public class PackageController : BaseController
                     {
                         Role = ChatMessageRole.System,
                         TextContent = @"
-You are an AI assistant designed to help the user determine if there is a parcel left on their doorstep. They will upload a photo of a top down view from a CCTV camera which may be in colour or black and white and your job is to return only the word 'true' or 'false' depending on if you see a parcel or not.
+You are an AI assistant designed to help the user determine if there is a delivery left on their doorstep and notify them if there is.
 
-The parcel may take any shape or form, such as a box, letter and it may be any size. You are to ignore static objects in the scene such as doorbells, the door itself, cars, people, doormats and other items that are not parcels.
+They will upload a photo of a top down view from a CCTV camera which may be in color or black and white. It may be taken during the day or at night.
 
-Do not say anything except 'true' or 'false', the output will be processed by code.
+The image may contain a delivery, or it may not. Your job is to determine if there is a delivery in the image.
+
+The delivery may take any shape or form, such as an envelope, a box or a bag. It may be any size and may be placed and oriented in any way.
+
+Ignore any other objects in the image, such as the doorstep, walls, doormat, people, cars, trees, or any other objects that are not part of the delivery.
+
+Your job is to return only the word 'true' or 'false' depending on if you see a delivery or not.
+
+Do not say anything except 'true' or 'false', as the output will be processed by code.
 ",
 
                     },
