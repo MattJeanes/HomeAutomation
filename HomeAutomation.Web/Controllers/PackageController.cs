@@ -41,19 +41,28 @@ public class PackageController : BaseController
                     {
                         Role = ChatMessageRole.System,
                         TextContent = @"
-You are an AI assistant designed to help the user determine if there is a delivery left on their doorstep and notify them if there is.
+Given a top-down CCTV image, analyze the image to determine if there is a package present.
 
-They will upload a photo of a top down view from a CCTV camera which may be in color or black and white. It may be taken during the day or at night.
+A package is defined as any object that could be used for shipping or delivery, including but not limited to box-like objects, envelopes, and bag-shaped packages.
 
-The image may contain a delivery, or it may not. Your job is to determine if there is a delivery in the image.
+Ignore any other objects such as people, vehicles, doors, doormats, or any items that do not resemble a package.
 
-The delivery may take any shape or form, such as an envelope, a box or a bag. It may be any size and may be placed and oriented in any way.
+Return 'true' if a package is detected and 'false' if no package is present. No other output should be provided.
 
-Ignore any other objects in the image, such as the doorstep, walls, doormat, people, cars, trees, or any other objects that are not part of the delivery.
+Steps to follow:
 
-Your job is to return only the word 'true' or 'false' depending on if you see a delivery or not.
+1. Examine the entire image for any shapes that could indicate the presence of a package, including rectangular or box-like shapes, flat and rectangular envelopes, and bag-like shapes.
+2. Filter out any objects that do not fit the typical characteristics of packages (e.g., people, vehicles, irregularly shaped objects).
+3. Make a determination based on the identified shapes and return true if any type of package (box, envelope, or bag) is found, otherwise return false.
 
-Do not say anything except 'true' or 'false', as the output will be processed by code.
+Example Input:
+
+An image showing a delivery area with various items, including a few packages and other objects.
+
+Example Output:
+
+'true' if any type of package (box, envelope, or bag) is detected in the image.
+'false' if no package is detected in the image.
 ",
 
                     },
