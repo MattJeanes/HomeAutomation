@@ -1,7 +1,5 @@
 using HomeAutomation.Web.Data;
 using HomeAutomation.Web.Middleware;
-using HomeAutomation.Web.Services;
-using HomeAutomation.Web.Services.Interfaces;
 using Microsoft.AspNetCore.StaticFiles;
 using MQTTnet;
 using MQTTnet.Client;
@@ -18,12 +16,6 @@ var mqttClientOptions = new MqttClientOptionsBuilder()
 builder.Services.AddControllers();
 builder.Services.AddSingleton<MqttFactory>();
 builder.Services.AddSingleton(mqttClientOptions);
-builder.Services.AddTransient<IWakeOnLANService, WakeOnLANService>();
-builder.Services.AddHttpClient<INotificationService, PushoverService>(x => x.BaseAddress = new Uri(builder.Configuration.GetValue<string>("Pushover:BaseUrl")));
-builder.Services.AddHttpClient<ITeslaService, TeslaService>(x => x.BaseAddress = new Uri(builder.Configuration.GetValue<string>("Tesla:BaseUrl")));
-builder.Services.Configure<ComputerOptions>(builder.Configuration.GetSection("Computer"));
-builder.Services.Configure<TeslaOptions>(builder.Configuration.GetSection("Tesla"));
-builder.Services.Configure<PushoverOptions>(builder.Configuration.GetSection("Pushover"));
 builder.Services.Configure<PackageOptions>(builder.Configuration.GetSection("Package"));
 builder.Services.AddMemoryCache();
 
