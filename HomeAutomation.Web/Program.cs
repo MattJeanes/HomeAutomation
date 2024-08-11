@@ -14,6 +14,7 @@ var mqttClientOptions = new MqttClientOptionsBuilder()
             .Build();
 
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 builder.Services.AddSingleton<MqttFactory>();
 builder.Services.AddSingleton(mqttClientOptions);
 builder.Services.Configure<PackageOptions>(builder.Configuration.GetSection("Package"));
