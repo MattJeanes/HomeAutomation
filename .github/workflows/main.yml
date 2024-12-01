@@ -1,8 +1,16 @@
 name: Build
 on:
   push:
+    branches:
+      - main
+      - renovate/*
+  pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish
+        type: boolean
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,31 +41,36 @@ jobs:
           docker build -t $app:arm64v8 -f "$appname/Dockerfile" . --build-arg arch=bookworm-slim-arm64v8
         done
       
-    - name: Upload a Build Artifact
+    - name: Upload Build Artifacts
+      if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: HomeAutomation-Web-linux-x64
         path: ./output/HomeAutomation-Web-linux-x64
-    
-    - name: Upload a Build Artifact
+
+    - name: Upload Build Artifacts (linux-arm64)
+      if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: HomeAutomation-Web-linux-arm64
         path: ./output/HomeAutomation-Web-linux-arm64
-        
-    - name: Upload a Build Artifact
+
+    - name: Upload Build Artifacts (linux-arm)
+      if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: HomeAutomation-Web-linux-arm
         path: ./output/HomeAutomation-Web-linux-arm
-        
-    - name: Upload a Build Artifact
+
+    - name: Upload Build Artifacts (win-x64)
+      if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: HomeAutomation-Web-win-x64
         path: ./output/HomeAutomation-Web-win-x64
         
     - name: Push Docker images
+      if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
       run: |
         echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
         for appname in HomeAutomation.Web; do
