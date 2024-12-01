@@ -43,28 +43,28 @@ jobs:
       
     - name: Upload Build Artifacts
       if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
       with:
         name: HomeAutomation-Web-linux-x64
         path: ./output/HomeAutomation-Web-linux-x64
 
     - name: Upload Build Artifacts (linux-arm64)
       if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
       with:
         name: HomeAutomation-Web-linux-arm64
         path: ./output/HomeAutomation-Web-linux-arm64
 
     - name: Upload Build Artifacts (linux-arm)
       if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
       with:
         name: HomeAutomation-Web-linux-arm
         path: ./output/HomeAutomation-Web-linux-arm
 
     - name: Upload Build Artifacts (win-x64)
       if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
       with:
         name: HomeAutomation-Web-win-x64
         path: ./output/HomeAutomation-Web-win-x64
