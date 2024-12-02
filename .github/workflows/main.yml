@@ -2,8 +2,8 @@ name: Build
 on:
   push:
     branches:
-      - main
-      - renovate/*
+    - main
+    - renovate/*
   pull_request:
     branches: [ main ]
   workflow_dispatch:
