@@ -2,7 +2,6 @@ using HomeAutomation.Web.Data;
 using HomeAutomation.Web.Middleware;
 using Microsoft.AspNetCore.StaticFiles;
 using MQTTnet;
-using MQTTnet.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHealthChecks();
@@ -15,7 +14,7 @@ var mqttClientOptions = new MqttClientOptionsBuilder()
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
-builder.Services.AddSingleton<MqttFactory>();
+builder.Services.AddSingleton<MqttClientFactory>();
 builder.Services.AddSingleton(mqttClientOptions);
 builder.Services.Configure<PackageOptions>(builder.Configuration.GetSection("Package"));
 builder.Services.AddMemoryCache();
