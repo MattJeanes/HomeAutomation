@@ -13,6 +13,7 @@ public class EnergyController : BaseController
     private readonly MqttClientFactory _mqttClientFactory;
     private readonly MqttClientOptions _mqttClientOptions;
     private readonly ILogger<EnergyController> _logger;
+    private const string _correlationIdProperty = "correlationId";
 
     public EnergyController(MqttClientFactory mqttClientFactory, MqttClientOptions mqttClientOptions, ILogger<EnergyController> logger)
     {
@@ -38,7 +39,7 @@ public class EnergyController : BaseController
         await mqttClient.SubscribeAsync("energy/solar/result");
 
         var correlationId = Guid.NewGuid().ToString();
-        request["correlationId"] = correlationId;
+        request[_correlationIdProperty] = correlationId;
 
         JsonObject response = null;
         mqttClient.ApplicationMessageReceivedAsync += (message) =>
@@ -47,8 +48,10 @@ public class EnergyController : BaseController
             try
             {
                 tempResponse = JsonNode.Parse(message.ApplicationMessage.ConvertPayloadToString()).AsObject();
-                if (tempResponse.TryGetPropertyValue("correlationId", out var correlationIdNode) && correlationIdNode.GetValue<string>() == correlationId)
+                var receivedCorrelationId = tempResponse[_correlationIdProperty].GetValue<string>();
+                if (receivedCorrelationId == correlationId)
                 {
+                    tempResponse.Remove(_correlationIdProperty);
                     response = tempResponse;
                 }
             }
