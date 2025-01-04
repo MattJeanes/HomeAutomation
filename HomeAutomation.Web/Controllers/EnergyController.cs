@@ -1,7 +1,6 @@
 ﻿using HomeAutomation.Web.Data;
 using Microsoft.AspNetCore.Mvc;
 using MQTTnet;
-using MQTTnet.Client;
 using MQTTnet.Protocol;
 using System.Net;
 using System.Text.Json.Nodes;
@@ -11,13 +10,13 @@ namespace HomeAutomation.Web.Controllers;
 [Route("api/[controller]")]
 public class EnergyController : BaseController
 {
-    private readonly MqttFactory _mqttFactory;
+    private readonly MqttClientFactory _mqttClientFactory;
     private readonly MqttClientOptions _mqttClientOptions;
     private readonly ILogger<EnergyController> _logger;
 
-    public EnergyController(MqttFactory mqttFactory, MqttClientOptions mqttClientOptions, ILogger<EnergyController> logger)
+    public EnergyController(MqttClientFactory mqttClientFactory, MqttClientOptions mqttClientOptions, ILogger<EnergyController> logger)
     {
-        _mqttFactory = mqttFactory;
+        _mqttClientFactory = mqttClientFactory;
         _mqttClientOptions = mqttClientOptions;
         _logger = logger;
     }
@@ -34,9 +33,12 @@ public class EnergyController : BaseController
             });
         }
 
-        using var mqttClient = _mqttFactory.CreateMqttClient();
+        using var mqttClient = _mqttClientFactory.CreateMqttClient();
         await mqttClient.ConnectAsync(_mqttClientOptions);
         await mqttClient.SubscribeAsync("energy/solar/result");
+
+        var correlationId = Guid.NewGuid().ToString();
+        request["correlationId"] = correlationId;
 
         JsonObject response = null;
         mqttClient.ApplicationMessageReceivedAsync += (message) =>
@@ -44,7 +46,11 @@ public class EnergyController : BaseController
             JsonObject tempResponse;
             try
             {
-                tempResponse = JsonNode.Parse(message.ApplicationMessage.PayloadSegment).AsObject();
+                tempResponse = JsonNode.Parse(message.ApplicationMessage.ConvertPayloadToString()).AsObject();
+                if (tempResponse.TryGetPropertyValue("correlationId", out var correlationIdNode) && correlationIdNode.GetValue<string>() == correlationId)
+                {
+                    response = tempResponse;
+                }
             }
             catch (Exception ex)
             {
