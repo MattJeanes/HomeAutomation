@@ -26,7 +26,7 @@ public class BoilerController : Controller
         {
             var processStartInfo = new ProcessStartInfo
             {
-                FileName = "python",
+                FileName = "python3",
                 UseShellExecute = false,
                 RedirectStandardOutput = true
             };
