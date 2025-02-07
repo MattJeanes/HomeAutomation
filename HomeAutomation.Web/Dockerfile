@@ -1,6 +1,7 @@
 ARG arch=bookworm-slim
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-${arch} AS base
+RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
 USER app
 WORKDIR /app
 EXPOSE 8080
