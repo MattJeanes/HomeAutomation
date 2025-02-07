@@ -1,3 +1,4 @@
+using DotnetGeminiSDK;
 using HomeAutomation.Web.Data;
 using HomeAutomation.Web.Middleware;
 using Microsoft.AspNetCore.StaticFiles;
@@ -17,7 +18,13 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<MqttClientFactory>();
 builder.Services.AddSingleton(mqttClientOptions);
 builder.Services.Configure<PackageOptions>(builder.Configuration.GetSection("Package"));
+builder.Services.Configure<BoilerOptions>(builder.Configuration.GetSection("Boiler"));
 builder.Services.AddMemoryCache();
+builder.Services.AddGeminiClient(config =>
+{
+    config.ApiKey = builder.Configuration.GetValue<string>("Gemini:ApiKey");
+    config.TextBaseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash";
+});
 
 var app = builder.Build();
 
