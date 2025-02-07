@@ -29,9 +29,6 @@ public class BoilerController : Controller
         var frame = await GetFrame();
         var reference = await GetReference();
 
-        await System.IO.File.WriteAllBytesAsync(@"E:\Matt\Downloads\testing\frame.jpg", frame);
-        await System.IO.File.WriteAllBytesAsync(@"E:\Matt\Downloads\testing\reference.jpg", reference);
-
         return await GetResponse(frame, reference);
     }
 
