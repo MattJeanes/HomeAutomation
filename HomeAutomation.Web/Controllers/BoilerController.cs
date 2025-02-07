@@ -60,9 +60,11 @@ public class BoilerController : Controller
                 throw new Exception("Failed to get response from Python");
             }
 
+            var pressureBar = Math.Clamp((float)Math.Round(internalResponse.Value, 1), _options.MinValue, _options.MaxValue);
+
             return new BoilerResponse
             {
-                PressureBar = internalResponse.Value
+                PressureBar = pressureBar
             };
         }
         finally
