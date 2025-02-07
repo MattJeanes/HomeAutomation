@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="FFMpegCore" Version="5.1.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.1" />
     <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
     <PackageReference Include="OpenAI" Version="2.1.0" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.1" />
