@@ -25,8 +25,6 @@ jobs:
     - name: Build project
       run: |
         dotnet publish ./HomeAutomation.Web/HomeAutomation.Web.csproj --self-contained true --runtime linux-x64 --output ./output/HomeAutomation-Web-linux-x64
-        dotnet publish ./HomeAutomation.Web/HomeAutomation.Web.csproj --self-contained true --runtime linux-arm64 --output ./output/HomeAutomation-Web-linux-arm64
-        dotnet publish ./HomeAutomation.Web/HomeAutomation.Web.csproj --self-contained true --runtime linux-arm --output ./output/HomeAutomation-Web-linux-arm
         dotnet publish ./HomeAutomation.Web/HomeAutomation.Web.csproj --self-contained true --runtime win-x64 --output ./output/HomeAutomation-Web-win-x64
         
     - name: Build Docker images
@@ -35,10 +33,6 @@ jobs:
           app=`echo $appname | tr '[:upper:]' '[:lower:]'`
           echo "Building $appname docker amd64"
           docker build -t $app:amd64 -f "$appname/Dockerfile" . --build-arg arch=bookworm-slim
-          echo "Building $appname docker arm32v7"
-          docker build -t $app:arm32v7 -f "$appname/Dockerfile" . --build-arg arch=bookworm-slim-arm32v7
-          echo "Building $appname docker arm64v8"
-          docker build -t $app:arm64v8 -f "$appname/Dockerfile" . --build-arg arch=bookworm-slim-arm64v8
         done
       
     - name: Upload Build Artifacts
@@ -47,20 +41,6 @@ jobs:
       with:
         name: HomeAutomation-Web-linux-x64
         path: ./output/HomeAutomation-Web-linux-x64
-
-    - name: Upload Build Artifacts (linux-arm64)
-      if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
-      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
-      with:
-        name: HomeAutomation-Web-linux-arm64
-        path: ./output/HomeAutomation-Web-linux-arm64
-
-    - name: Upload Build Artifacts (linux-arm)
-      if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
-      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
-      with:
-        name: HomeAutomation-Web-linux-arm
-        path: ./output/HomeAutomation-Web-linux-arm
 
     - name: Upload Build Artifacts (win-x64)
       if: github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
@@ -76,19 +56,17 @@ jobs:
         for appname in HomeAutomation.Web; do
           app=`echo $appname | tr '[:upper:]' '[:lower:]'`
           echo "Deploying $appname"
-          for arch in amd64 arm32v7 arm64v8; do
+          for arch in amd64; do
             docker tag $app:$arch $DOCKER_USERNAME/$app:latest-$arch
           done
           for ver in latest; do
             echo "Deploying version $ver"
-            for arch in amd64 arm32v7 arm64v8; do
+            for arch in amd64; do
               echo "Pushing docker tag $ver-arch"
               docker push $DOCKER_USERNAME/$app:$ver-$arch
             done
-            docker manifest create $DOCKER_USERNAME/$app:$ver $DOCKER_USERNAME/$app:$ver-amd64 $DOCKER_USERNAME/$app:$ver-arm32v7 $DOCKER_USERNAME/$app:$ver-arm64v8
+            docker manifest create $DOCKER_USERNAME/$app:$ver $DOCKER_USERNAME/$app:$ver-amd64
             docker manifest annotate $DOCKER_USERNAME/$app:$ver $DOCKER_USERNAME/$app:$ver-amd64 --os linux --arch amd64
-            docker manifest annotate $DOCKER_USERNAME/$app:$ver $DOCKER_USERNAME/$app:$ver-arm32v7 --os linux --arch arm
-            docker manifest annotate $DOCKER_USERNAME/$app:$ver $DOCKER_USERNAME/$app:$ver-arm64v8 --os linux --arch arm64
             docker manifest push $DOCKER_USERNAME/$app:$ver
           done
         done
