@@ -22,6 +22,7 @@ public class BoilerController : Controller
     public async Task<BoilerResponse> GetBoilerPressure()
     {
         var framePath = await GetFrame();
+        // System.IO.File.Copy(framePath, @"E:\Matt\Downloads\testing\frame.jpg", true);
         try
         {
             var processStartInfo = new ProcessStartInfo
@@ -36,6 +37,7 @@ public class BoilerController : Controller
             processStartInfo.ArgumentList.Add($"--max_angle={_options.MaxAngle}");
             processStartInfo.ArgumentList.Add($"--min_value={_options.MinValue}");
             processStartInfo.ArgumentList.Add($"--max_value={_options.MaxValue}");
+            processStartInfo.ArgumentList.Add($"--min_needle_size={_options.MinNeedleSize}");
             processStartInfo.ArgumentList.Add(framePath);
             var process = new Process();
             process.StartInfo = processStartInfo;

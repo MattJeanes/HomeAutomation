@@ -8,4 +8,5 @@ public class BoilerOptions
     public int MaxAngle { get; set; }
     public int MinValue { get; set; }
     public int MaxValue { get; set; }
+    public int MinNeedleSize { get; set; }
 }

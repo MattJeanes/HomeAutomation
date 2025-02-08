@@ -99,7 +99,7 @@ def calibrate_gauge(img, gauge_pixels_radius):
 
     return x, y, r
 
-def get_current_value(img, min_angle, max_angle, min_value, max_value, gauge_pixels_radius, debug):
+def get_current_value(img, min_angle, max_angle, min_value, max_value, gauge_pixels_radius, min_needle_size, debug):
     x, y, r = find_gauge(img, gauge_pixels_radius)
 
     gray2 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -118,13 +118,13 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, gauge_pix
 
     contours = cv2.findContours(dst2, mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-    # get contours that are closest to the circle of the gauge
+    # get contours that are closest to the circle of the gauge and above a minimum size
     closest_contour = None
     min_dist = 10000
     for contour in contours:
         (x1, y1), (w, h), angle = cv2.minAreaRect(contour)
         dist = dist_2_pts(x, y, x1, y1)
-        if dist < min_dist:
+        if dist < min_dist and cv2.contourArea(contour) > min_needle_size:
             closest_contour = contour
             min_dist = dist
 
@@ -140,9 +140,10 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, gauge_pix
     x1, y1 = all_points[np.argmax(dist_2_pts(x, y, all_points[:, 0], all_points[:, 1]))]
 
     if debug:     
-        cv2.drawContours(img, [closest_contour], -1, (255,0,0), 1)
+        cv2.drawContours(img, contours, -1, (255,0,0), 1)
+        # cv2.drawContours(img, [closest_contour], -1, (255,0,0), 1)
         # show circle and center
-        # cv2.circle(img, (x, y), r, (255, 0, 0), 2)
+        cv2.circle(img, (x, y), r, (255, 0, 0), 2)
         # show X (marks the spot) at the farthest point found
         cv2.circle(img, (x1, y1), 5, (0, 0, 255), 2)
         cv2.imshow('Show line', img)
@@ -201,6 +202,7 @@ def main():
         required.add_argument("--max_angle", help="Max angle (highest possible angle) - in degrees", type=int, required=True)
         required.add_argument("--min_value", help="Min value", type=float, required=True)
         required.add_argument("--max_value", help="Max value", type=float, required=True)
+        required.add_argument("--min_needle_size", help="Min needle area size", type=float, required=True)
 
     args = parser.parse_args()
 
@@ -210,7 +212,7 @@ def main():
         calibrate_gauge(img, args.gauge_radius)
         return
 
-    ang, val = get_current_value(img, args.min_angle, args.max_angle, args.min_value, args.max_value, args.gauge_radius, args.debug)
+    ang, val = get_current_value(img, args.min_angle, args.max_angle, args.min_value, args.max_value, args.gauge_radius, args.min_needle_size, args.debug)
     # output json containing and and val
     print('{"angle": %s, "value": %s}' % (ang, val))
     
