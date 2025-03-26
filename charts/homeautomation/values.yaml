@@ -1,0 +1,32 @@
+replicaCount: 1
+image:
+  repository: mattjeanes/homeautomation.web
+  tag: latest
+  pullPolicy: Always
+ingress:
+  host: ""
+resources:
+  requests:
+    memory: 75Mi
+    cpu: 10m
+  limits:
+    memory: 75Mi
+env:
+  secret:
+    Key: ""
+    Mqtt__Password: ""
+    Package__OpenAIApiKey: ""
+    Package__Locations__0__ImageUrl: ""
+    Package__Locations__1__ImageUrl: ""
+    Boiler__RtspUrl: ""
+  normal:
+    Mqtt__Server: ""
+    Mqtt__Username: ""
+    Package__Locations__0__Id: ""
+    Package__Locations__1__Id: ""
+    Boiler__GaugeRadius: ""
+    Boiler__MinAngle: ""
+    Boiler__MaxAngle: ""
+    Boiler__MinValue: ""
+    Boiler__MaxValue: ""
+    Boiler__MinNeedleSize: ""

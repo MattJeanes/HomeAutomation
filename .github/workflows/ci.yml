@@ -1,0 +1,89 @@
+name: CI
+on:
+  push:
+    branches:
+    - main
+    - renovate/*
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      skipBuild:
+        description: 'Skip Build (deploy only)'
+        required: true
+        default: 'false'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    
+    - name: Build Docker image
+      run: docker build -t $DOCKER_USERNAME/homeautomation.web:latest .
+      env:
+        DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+      if: github.event.inputs.skipBuild != 'true'
+
+    - name: Push Docker images
+      run: |
+        echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+        docker push $DOCKER_USERNAME/homeautomation.web:latest
+      env:
+        DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      if: github.ref == 'refs/heads/main' && github.event.inputs.skipBuild != 'true'
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    name: Deploy
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    
+    - name: Checkout Infrastructure repo
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      with:
+        repository: MattJeanes/Abyss-Infrastructure
+        path: infrastructure
+    
+    - name: Connect to Kubernetes
+      uses: MattJeanes/Abyss-Infrastructure/.github/actions/connect-k8s@main
+      with:
+        kubeconfig: "${{ secrets.KUBECONFIG }}"
+        hostname: "${{ vars.KUBERNETES_API_HOSTNAME }}"
+        serviceTokenId: ${{ vars.CLOUDFLARE_TUNNEL_SERVICE_TOKEN_ID }}
+        serviceTokenSecret: ${{ secrets.CLOUDFLARE_TUNNEL_SERVICE_TOKEN_SECRET }}
+        
+    - name: Install Home Automation
+      run: |
+        helm upgrade --install --wait --atomic --debug --timeout 10m0s \
+          homeautomation ./homeautomation \
+          --namespace default \
+          --set ingress.host="${{ vars.HOST }}" \
+          --set env.secret.Key="${{ secrets.KEY }}" \
+          --set env.secret.Mqtt__Password="${{ secrets.MQTT_PASSWORD }}" \
+          --set env.secret.Package__OpenAIApiKey="${{ secrets.PACKAGE_OPENAI_API_KEY }}" \
+          --set env.secret.Package__Locations__0__ImageUrl="${{ secrets.PACKAGE_LOCATIONS_0_IMAGE_URL }}" \
+          --set env.secret.Package__Locations__1__ImageUrl="${{ secrets.PACKAGE_LOCATIONS_1_IMAGE_URL }}" \
+          --set env.secret.Boiler__RtspUrl="${{ secrets.BOILER_RTSP_URL }}" \
+          --set env.normal.Mqtt__Server="${{ vars.MQTT_SERVER }}" \
+          --set env.normal.Mqtt__Username="${{ vars.MQTT_USERNAME }}" \
+          --set env.normal.Package__Locations__0__Id="${{ vars.PACKAGE_LOCATIONS_0_ID }}" \
+          --set env.normal.Package__Locations__1__Id="${{ vars.PACKAGE_LOCATIONS_1_ID }}" \
+          --set env.normal.Boiler__GaugeRadius="${{ vars.BOILER_GAUGE_RADIUS }}" \
+          --set env.normal.Boiler__MinAngle="${{ vars.BOILER_MIN_ANGLE }}" \
+          --set env.normal.Boiler__MaxAngle="${{ vars.BOILER_MAX_ANGLE }}" \
+          --set env.normal.Boiler__MinValue="${{ vars.BOILER_MIN_VALUE }}" \
+          --set env.normal.Boiler__MaxValue="${{ vars.BOILER_MAX_VALUE }}" \
+          --set env.normal.Boiler__MinNeedleSize="${{ vars.BOILER_MIN_NEEDLE_SIZE }}"
+      working-directory: charts
+      
+    - name: Wait for certificate to be ready
+      run: ./WaitKubeCertificate.ps1 -Name "homeautomation-tls"
+      shell: pwsh
+      working-directory: infrastructure/scripts
+
+    - name: Disconnect from Kubernetes
+      uses: MattJeanes/Abyss-Infrastructure/.github/actions/disconnect-k8s@main
