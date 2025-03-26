@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     
     - name: Build Docker image
-      run: docker build -t $DOCKER_USERNAME/homeautomation.web:latest .
+      run: docker build -f HomeAutomation.Web/Dockerfile -t $DOCKER_USERNAME/homeautomation.web:latest .
       env:
         DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
       if: github.event.inputs.skipBuild != 'true'
@@ -79,7 +79,7 @@ jobs:
           --set env.normal.Boiler__MaxValue="${{ vars.BOILER_MAX_VALUE }}" \
           --set env.normal.Boiler__MinNeedleSize="${{ vars.BOILER_MIN_NEEDLE_SIZE }}"
       working-directory: charts
-      
+
     - name: Wait for certificate to be ready
       run: ./WaitKubeCertificate.ps1 -Name "homeautomation-tls"
       shell: pwsh
