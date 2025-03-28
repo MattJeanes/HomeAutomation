@@ -1,6 +1,4 @@
-ARG arch=bookworm-slim
-
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-${arch} AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim AS base
 RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg python3 python3-pip
 COPY ["HomeAutomation.Web/BoilerGaugeReader/requirements.txt", "/tmp/"]
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt --break-system-packages
