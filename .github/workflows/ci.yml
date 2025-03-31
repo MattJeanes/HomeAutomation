@@ -81,9 +81,9 @@ jobs:
       working-directory: charts
 
     - name: Wait for certificate to be ready
-      run: ./WaitKubeCertificate.ps1 -Name "homeautomation-tls"
-      shell: pwsh
-      working-directory: infrastructure/scripts
+      uses: MattJeanes/Abyss-Infrastructure/.github/actions/wait-kube-certificate@main
+      with:
+        name: "homeautomation-tls"
 
     - name: Disconnect from Kubernetes
       uses: MattJeanes/Abyss-Infrastructure/.github/actions/disconnect-k8s@main
